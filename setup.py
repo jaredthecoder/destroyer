@@ -15,6 +15,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        destroyercli=destroyer.destroyer:main
+        destroyer=destroyer.destroyer:main
     ''',
 )
