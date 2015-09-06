@@ -6,11 +6,19 @@ import click
 
 from .services.twitter import TwitterDestroyer
 
-@click.command()
+
+@click.group()
 def cli():
-    click.echo('I am Destroyer, harbinger of exiled followers, friends, and more.')
-    click.echo('Change made!')
+    pass
+
+
+@click.command()
+@click.option('--unfollow_nonfollowers', default=False, type=click.BOOL)
+def twitter(unfollow_nonfollowers):
+    twitter_destroyer = TwitterDestroyer(unfollow_nonfollowers)
+    twitter_destroyer.destroy()
 
 
 def main():
+    cli.add_command(twitter)
     cli()

@@ -2,6 +2,7 @@
 
 import time
 
+import click
 import tweepy
 
 from ..settings import consumer_key, consumer_secret
@@ -9,15 +10,21 @@ from ..settings import access_token, access_token_secret
 
 
 class TwitterDestroyer():
+    """Destroyer class for Twitter integration.
+    """
     def __init__(self, unfollow_non_followers=False):
+        """Initializer method"""
         self.auth = tweepy.auth.OAuthHandler(consumer_key=consumer_key, consumer_secret=consumer_secret)
         self.auth.set_access_token(access_token, access_token_secret)
-        self.api = tweepy.API(auth_handler=self.auth)
+        self.api = tweepy.API(auth_handler=self.auth, wait_on_rate_limit=True, wait_on_rate_limit_notify=True)
 
         self.unfollow_non_followers = unfollow_non_followers
         self.logger = None
 
     def _unfollow(self, user):
+        """Private method that takes a Tweepy user object and unfollows the user.
+        The user that is unfollowing the user passed into this function is the user
+        authenticated with the current Tweepy API class instance."""
         print('Unfollowing ' + str(user.id).rjust(10))
         try:
             user.unfollow()
@@ -29,27 +36,33 @@ class TwitterDestroyer():
         time.sleep(1)
 
     def destroy(self):
+        """Public method that implements the abstracted functionality of unfollowing users"""
         if self.unfollow_non_followers:
-            follower_objects = [follower for follower in tweepy.Cursor(self.api.followers).items()]
-            followers = dict([(follower.id, follower) for follower in follower_objects])
+            followers = dict()
+            print('Getting followers')
+            for follower in tweepy.Cursor(self.api.followers).items():
+                followers[follower.id] = follower
+            print('Finished getting followers')
 
-        friend_objects = [friend for friend in tweepy.Cursor(self.api.friends).items()]
-        friends = dict([(friend.id, friend) for friend in friend_objects])
+        friends = dict()
+        print('Getting friends')
+        for friend in tweepy.Cursor(self.api.friends).items():
+            friends[friend.id] = friend
+        print('Finished getting friends')
 
         if self.unfollow_non_followers:
             non_friends = [friend for friend in friend_objects if friend.id not in followers]
 
         if self.unfollow_non_followers:
-            answer = raw_input('Are you sure you want to unfollow all the people you are following that are not following you? [Y/n]').lower()
-            if answer and answer[0] != 'y':
-                return True
+            answer = click.confirm('Are you sure you want to unfollow all the people you are following that are not following you? [Y/n]', abort=True)
             for non_friend in non_friends:
                 self.unfollow(non_friend)
         else:
             for friend in friends:
-                answer = raw_input('Do you want to unfollow your friend, {friend}? [Y/n]'
-                                    .format(friend=str(friend.id).rjust(10))).lower()
-                if answer and answer[0] != 'y':
+                answer = click.confirm('Do you want to unfollow your friend, {friend}? [Y/n]'
+                                        .format(friend=str(friend.id).rjust(10)))
+                if not answer:
                     print('Okay, not unfollowing {friend}'.format(friend=str(friend.id)).rjust(10))
+                    continue
                 print('Unfollowing ' + str(friend.id).rjust(10))
                 self._unfollow(friend)
