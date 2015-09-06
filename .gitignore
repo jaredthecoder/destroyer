@@ -55,4 +55,8 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# This project
 .ropeproject
+destroyer/settings.py
+
