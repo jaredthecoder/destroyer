@@ -40,13 +40,15 @@ class TwitterDestroyer():
         if self.unfollow_non_followers:
             followers = dict()
             print('Getting followers')
-            for follower in tweepy.Cursor(self.api.followers).items():
-                followers[follower.id] = follower
+            for i, follower_set in enumerate(tweepy.Cursor(self.api.followers, count=1000).pages()):
+                for follower in follower_set:
+                    print(follower.screen_name)
+                    followers[follower.id] = follower
             print('Finished getting followers')
 
         friends = dict()
         print('Getting friends')
-        for i, friend_set in enumerate(tweepy.Cursor(self.api.friends, count=500).pages()):
+        for i, friend_set in enumerate(tweepy.Cursor(self.api.friends, count=1000).pages()):
             for friend in friend_set:
                 print(friend.screen_name)
                 friends[friend.id] = friend
@@ -60,11 +62,11 @@ class TwitterDestroyer():
             for non_friend in non_friends:
                 self.unfollow(non_friend)
         else:
-            for friend in friends:
+            for friend_id, friend in friends.items():
                 answer = click.confirm('Do you want to unfollow your friend, {friend}? [Y/n]'
-                                        .format(friend=str(friend.id).rjust(10)))
+                                        .format(friend=str(friend.screen_name).rjust(10)))
                 if not answer:
                     print('Okay, not unfollowing {friend}'.format(friend=str(friend.id)).rjust(10))
                     continue
-                print('Unfollowing ' + str(friend.id).rjust(10))
+                print('Unfollowing ' + str(friend.screen_name).rjust(10))
                 self._unfollow(friend)
