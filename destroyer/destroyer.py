@@ -5,6 +5,7 @@ the command line interface."""
 import click
 
 from .services.twitter import TwitterDestroyer
+from .services.facebook import FacebookDestroyer
 
 
 @click.group()
@@ -19,6 +20,13 @@ def twitter(unfollow_nonfollowers):
     twitter_destroyer.destroy()
 
 
+@click.command()
+def facebook():
+    facebook_destroyer = FacebookDestroyer()
+    facebook_destroyer.destroy()
+
+
 def main():
     cli.add_command(twitter)
+    cli.add_command(facebook)
     cli()
