@@ -46,8 +46,10 @@ class TwitterDestroyer():
 
         friends = dict()
         print('Getting friends')
-        for friend in tweepy.Cursor(self.api.friends).items():
-            friends[friend.id] = friend
+        for i, friend_set in enumerate(tweepy.Cursor(self.api.friends, count=500).pages()):
+            for friend in friend_set:
+                print(friend.screen_name)
+                friends[friend.id] = friend
         print('Finished getting friends')
 
         if self.unfollow_non_followers:
