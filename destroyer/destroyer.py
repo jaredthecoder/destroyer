@@ -4,12 +4,13 @@ the command line interface."""
 
 import click
 
-from services.twitter import TwitterDestroyer
+from .services.twitter import TwitterDestroyer
 
 @click.command()
 def cli():
     click.echo('I am Destroyer, harbinger of exiled followers, friends, and more.')
+    click.echo('Change made!')
 
 
-def main()
+def main():
     cli()
