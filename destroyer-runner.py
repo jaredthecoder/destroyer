@@ -2,10 +2,9 @@
 """destroyer-runner.py - Run the main application"""
 
 
-import sys
-import subprocess
+from destroyer.destroyer import main
 
 
 if __name__ == '__main__':
-    subprocess.call(['python', './destroyer/destroyer.py'] + [str(arg) for arg in sys.argv[1:]])
+    main()
 
