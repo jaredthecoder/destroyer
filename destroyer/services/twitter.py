@@ -4,8 +4,8 @@ import time
 
 import tweepy
 
-from destroyer.settings import consumer_key, consumer_secret
-from destroyer.settings import access_token, access_token_secret
+from settings import consumer_key, consumer_secret
+from settings import access_token, access_token_secret
 
 
 class TwitterDestroyer():

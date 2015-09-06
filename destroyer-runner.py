@@ -1,9 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr/bin/python
+"""destroyer-runner.py - Run the main application"""
 
 
-from destroyer.destroyer import main
+import sys
+import subprocess
 
 
 if __name__ == '__main__':
-    main()
+    subprocess.call(['python', './destroyer/destroyer.py'] + [str(arg) for arg in sys.argv[1:]])
+
