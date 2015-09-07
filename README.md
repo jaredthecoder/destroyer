@@ -1,6 +1,6 @@
 # Destroyer
 
-Unfollow and unfriend social media users with a burning passion.
+:fire: Unfollow and unfriend social media users with a burning passion. :fire:
 
 ##Overview:
 Destroyer will mercilessly remove your followers and friends from various social networks, with current support for only Twitter.
