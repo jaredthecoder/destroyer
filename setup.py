@@ -13,6 +13,7 @@ setup(
         'Tweepy',
         'Facepy',
         'Click',
+        'Tabulate',
     ],
     entry_points='''
         [console_scripts]
