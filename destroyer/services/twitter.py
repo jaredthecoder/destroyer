@@ -25,15 +25,11 @@ class TwitterDestroyer():
         """Private method that takes a Tweepy user object and unfollows the user.
         The user that is unfollowing the user passed into this function is the user
         authenticated with the current Tweepy API class instance."""
-        print('Unfollowing ' + str(user.id).rjust(10))
         try:
             user.unfollow()
         except:
-            print('  .. failed, sleeping for 5 seconds and then trying again.')
             time.sleep(5)
             user.unfollow()
-        print(' .. completed, sleeping for 1 second.')
-        time.sleep(1)
 
     def destroy(self):
         """Public method that implements the abstracted functionality of unfollowing users"""
@@ -58,13 +54,18 @@ class TwitterDestroyer():
             non_friends = [friend for friend in friend_objects if friend.id not in followers]
 
         if self.unfollow_non_followers:
-            answer = click.confirm('Are you sure you want to unfollow all the people you are following that are not following you? [Y/n]', abort=True)
+            answer = click.confirm('Are you sure you want to unfollow all the people you are following that are not following you?', abort=True)
             for non_friend in non_friends:
                 self.unfollow(non_friend)
         else:
             for friend_id, friend in friends.items():
-                answer = click.confirm('Do you want to unfollow your friend, {friend}? [Y/n]'
-                                        .format(friend=str(friend.screen_name).rjust(10)))
+                friend_is_following = False
+                if friend.following:
+                    friend_is_following = True
+                friend_data = [[friend.name, friend.screen_name, friend.description, friend_is_following, friend.followers_count, friend.location]]
+                friend_headers = ['Name', 'Handle', 'Bio', 'Follows you?', 'Followers', 'Location']
+                answer = click.confirm('Do you want to unfollow your friend, {friend}?\n{data}'
+                                        .format(friend=str(friend.screen_name).rjust(10), data=tabulate(friend_data, friend_headers, tablefmt='fancy_grid')))
                 if not answer:
                     print('Okay, not unfollowing {friend}'.format(friend=str(friend.id)).rjust(10))
                     continue
