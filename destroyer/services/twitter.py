@@ -33,6 +33,30 @@ class TwitterDestroyer():
             time.sleep(5)
             user.unfollow()
 
+    def _unfollow_non_friends(self, non_friends):
+        """Private method that takes a list of non_friends and calls _unfollow on them"""
+        for non_friend in non_friends:
+            self._unfollow(non_friend)
+
+    def _unfollow_friends(self, friends):
+        """Private method that takes a list of friends and calls _unfollow on them"""
+        for friend_id, friend in friends.items():
+            friend_is_following = False
+            if friend.following:
+                friend_is_following = True
+            friend_data = [[friend.name, friend.screen_name, friend.description, friend_is_following, friend.followers_count, friend.location]]
+            friend_headers = ['Name', 'Handle', 'Bio', 'Follows you?', 'Followers', 'Location']
+
+            print('You are following {friend}.'.format(friend=friend.name))
+            print(tabulate(friend_data, friend_headers, tablefmt='fancy_grid'))
+
+            answer = click.confirm('{prompt}'.format(prompt=get_random_prompt(friend.screen_name, 'question')))
+            if not answer:
+                print('Not unfollowing {friend}.'.format(friend=friend.screen_name))
+                continue
+            self._unfollow(friend)
+            print('{prompt}'.format(prompt=get_random_prompt(friend.screen_name, 'insult')))
+
     def destroy(self):
         """Public method that implements the abstracted functionality of unfollowing users"""
         if self.unfollow_non_followers:
@@ -55,22 +79,6 @@ class TwitterDestroyer():
 
         if self.unfollow_non_followers:
             answer = click.confirm('Are you sure you want to unfollow all the people you are following that are not following you?', abort=True)
-            for non_friend in non_friends:
-                self.unfollow(non_friend)
+            self._unfollow_non_friends(non_friends)
         else:
-            for friend_id, friend in friends.items():
-                friend_is_following = False
-                if friend.following:
-                    friend_is_following = True
-                friend_data = [[friend.name, friend.screen_name, friend.description, friend_is_following, friend.followers_count, friend.location]]
-                friend_headers = ['Name', 'Handle', 'Bio', 'Follows you?', 'Followers', 'Location']
-
-                print('You are following {friend}.'.format(friend=friend.name))
-                print(tabulate(friend_data, friend_headers, tablefmt='fancy_grid'))
-
-                answer = click.confirm('{prompt}'.format(prompt=get_random_prompt(friend.screen_name, 'question')))
-                if not answer:
-                    print('Not unfollowing {friend}.'.format(friend=friend.screen_name))
-                    continue
-                self._unfollow(friend)
-                print('{prompt}'.format(prompt=get_random_prompt(friend.screen_name, 'insult')))
+            self._unfollow_friends(friends)
