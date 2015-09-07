@@ -4,10 +4,11 @@ import time
 
 import click
 import tweepy
-import tabulate
+from tabulate import tabulate
 
 from ..settings import consumer_key, consumer_secret
 from ..settings import access_token, access_token_secret
+from ..utils import get_random_prompt
 
 
 class TwitterDestroyer():
@@ -63,10 +64,13 @@ class TwitterDestroyer():
                     friend_is_following = True
                 friend_data = [[friend.name, friend.screen_name, friend.description, friend_is_following, friend.followers_count, friend.location]]
                 friend_headers = ['Name', 'Handle', 'Bio', 'Follows you?', 'Followers', 'Location']
-                answer = click.confirm('Do you want to unfollow your friend, {friend}?\n{data}'
-                                        .format(friend=friend.name, data=tabulate(friend_data, friend_headers, tablefmt='fancy_grid')))
+
+                print('You are following {friend}.'.format(friend=friend.name))
+                print(tabulate(friend_data, friend_headers, tablefmt='fancy_grid'))
+
+                answer = click.confirm('{prompt}'.format(prompt=get_random_prompt(friend.screen_name, 'question')))
                 if not answer:
-                    print('Okay, not unfollowing {friend}'.format(friend=friend.screen_name))
+                    print('Not unfollowing {friend}.'.format(friend=friend.screen_name))
                     continue
-                print('Unfollowing {friend}'.format(friend.screen_name))
                 self._unfollow(friend)
+                print('{prompt}'.format(prompt=get_random_prompt(friend.screen_name, 'insult')))
