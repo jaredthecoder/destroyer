@@ -20,6 +20,7 @@ class TwitterDestroyer():
         self.auth.set_access_token(access_token, access_token_secret)
         self.api = tweepy.API(auth_handler=self.auth, wait_on_rate_limit=False, wait_on_rate_limit_notify=True)
 
+        self.me = self.api.me()
         self.unfollow_non_followers = unfollow_non_followers
         self.logger = None
 
@@ -40,39 +41,40 @@ class TwitterDestroyer():
 
     def _unfollow_friends(self, friends):
         """Private method that takes a list of friends and calls _unfollow on them"""
+        print('\n\n')
         for friend_id, friend in friends.items():
             friend_is_following = False
-            if friend.following:
+            if self.api.exists_friendship(self.me.id, friend.id):
                 friend_is_following = True
-            friend_data = [[friend.name, friend.screen_name, friend.description, friend_is_following, friend.followers_count, friend.location]]
+            trimmed_friend_description = friend_description[:50].strip() + '...'
+            friend_data = [[friend.name, friend.screen_name, trimmed_friend_description, friend_is_following,
+                            friend.followers_count, friend.location]]
             friend_headers = ['Name', 'Handle', 'Bio', 'Follows you?', 'Followers', 'Location']
 
-            print('You are following {friend}.'.format(friend=friend.name))
+            print(tabulate([[friend.name]], ['Current Friend'], tablefmt='fancy_grid'))
             print(tabulate(friend_data, friend_headers, tablefmt='fancy_grid'))
 
             answer = click.confirm('{prompt}'.format(prompt=get_random_prompt(friend.screen_name, 'question')))
             if not answer:
-                print('Not unfollowing {friend}.'.format(friend=friend.screen_name))
+                print(tabulate([['Not unfollowing {friend}.'.format(friend=friend.screen_name)]], tablefmt='fancy_grid')
                 continue
             self._unfollow(friend)
             print('{prompt}'.format(prompt=get_random_prompt(friend.screen_name, 'insult')))
+            print('\n\n')
 
     def destroy(self):
         """Public method that implements the abstracted functionality of unfollowing users"""
+        # TODO: Add progress bar here while getting followers
+        followers = dict()
         if self.unfollow_non_followers:
-            followers = dict()
-            print('Getting followers')
             for follower in tweepy.Cursor(self.api.followers, skip_status=True, include_user_entities=False, count=1000).pages():
-                print(follower.screen_name)
                 followers[follower.id] = follower
-            print('Finished getting followers')
 
+        # TODO: Add progress bar here while getting friends
         friends = dict()
-        print('Getting friends')
         for friend in tweepy.Cursor(self.api.friends, skip_status=True, include_user_entities=False, count=200).items():
             print(friend.screen_name)
             friends[friend.id] = friend
-        print('Finished getting friends')
 
         if self.unfollow_non_followers:
             non_friends = [friend for friend in friend_objects if friend.id not in followers]
